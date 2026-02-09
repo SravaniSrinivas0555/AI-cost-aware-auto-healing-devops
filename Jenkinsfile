@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git ''
+                git 'https://github.com/SravaniSrinivas0555/AI-cost-aware-auto-healing-devops.git'
             }
         }
 
