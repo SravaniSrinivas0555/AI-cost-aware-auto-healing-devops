@@ -2,11 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/SravaniSrinivas0555/AI-cost-aware-auto-healing-devops.git'
-            }
-        }
 
         stage('Build Docker Image') {
             steps {
