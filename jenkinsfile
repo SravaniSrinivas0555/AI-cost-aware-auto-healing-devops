@@ -1,22 +1,68 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "cost-aware-app"
+        IMAGE_TAG  = "latest"
+    }
+
     stages {
 
-        stage('Build Docker Image') {
+        stage('Checkout Code') {
             steps {
-                sh 'docker build -t costaware-app:latest .'
+                checkout scm
             }
         }
 
-        stage('Run Container') {
+        stage('Docker Test') {
+            steps {
+                sh 'echo Checking Docker version...'
+                sh 'docker --version'
+                sh 'echo Listing running containers...'
+                sh 'docker ps'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'echo Building Docker image...'
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+            }
+        }
+
+        stage('Verify Image') {
+            steps {
+                sh 'echo Listing Docker images...'
+                sh 'docker images'
+            }
+        }
+
+        stage('Run Container (Test)') {
             steps {
                 sh '''
-                docker stop costaware || true
-                docker rm costaware || true
-                docker run -d -p 5000:5000 --name costaware costaware-app:latest
+                echo Running container...
+                docker run -d -p 8081:8080 --name test-container $IMAGE_NAME:$IMAGE_TAG
                 '''
             }
+        }
+
+        stage('Cleanup') {
+            steps {
+                sh '''
+                echo Cleaning up...
+                docker stop test-container || true
+                docker rm test-container || true
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully 🚀'
+        }
+        failure {
+            echo 'Pipeline failed ❌'
         }
     }
 }
